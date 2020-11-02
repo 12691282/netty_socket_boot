@@ -81,3 +81,14 @@ iot-socket:
   reconnectionAttempts: 50   # io-socket 失败重试次数
   reconnectionDelay: 2000   # 失败重连的时间间隔 (ms)
   timeout: 1000 #连接超时时间(ms)
+
+#Spring Boot 2.1 之后的日志配置
+logging:
+  level:
+    root: info
+    org:
+      mybatis: debug
+      springframework:
+        web: trace
+    java:
+      sql: debug

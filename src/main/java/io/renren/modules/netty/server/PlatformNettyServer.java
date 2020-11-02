@@ -11,8 +11,8 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.ResourceLeakDetector;
 import io.netty.util.concurrent.EventExecutorGroup;
+import io.renren.modules.netty.decoder.ByteToModelDecoder;
 import io.renren.modules.netty.handler.PlatformMessageDataHandler;
-import io.renren.modules.netty.server.decoder.ByteToStringDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,27 +67,6 @@ public class PlatformNettyServer {
      */
     @PostConstruct
     public void start() throws InterruptedException {
-//        ServerBootstrap serverBootstrap = new ServerBootstrap();
-//        try {
-//
-//            serverBootstrap.group(bossGroup, workerGroup)
-//                    .channel(NioServerSocketChannel.class)
-//                    .childHandler(channelInitializer)
-//                    .handler(new LoggingHandler(LogLevel.INFO))
-//                    .option(ChannelOption.SO_BACKLOG, 1024)//服务端可连接队列数,对应TCP/IP协议listen函数中backlog参数
-//                    .childOption(ChannelOption.TCP_NODELAY, true)//立即写出
-//                    .childOption(ChannelOption.SO_KEEPALIVE, true);//保持长连接
-//            ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.SIMPLE);//内存泄漏检测 开发推荐PARANOID 线上SIMPLE
-//            ChannelFuture channelFuture = serverBootstrap.bind(port).sync();
-//            if (channelFuture.isSuccess()) {
-//                logger.info("平台socket服务启动完毕,port={}", this.port);
-//            }
-//        } finally {
-//            // 优雅释放线程资源
-//            workerGroup.shutdownGracefully();
-//            bossGroup.shutdownGracefully();
-//        }
-
         try {
             ServerBootstrap serverBootstrap = new ServerBootstrap();
             serverBootstrap.group(bossGroup, workerGroup)
@@ -103,7 +82,7 @@ public class PlatformNettyServer {
                 logger.info("平台socket服务启动完毕,port={}", this.port);
             }
             // 等到服务端监听端口关闭
-            channelFuture.channel().closeFuture().sync();
+//            channelFuture.channel().closeFuture().sync();
         } finally {
             // 优雅释放线程资源
             workerGroup.shutdownGracefully();
@@ -132,7 +111,7 @@ public class PlatformNettyServer {
         protected void initChannel(SocketChannel ch) throws Exception {
             // 添加自定义协议的编解码工具
             /** 解析报文 */
-            ch.pipeline().addLast(new ByteToStringDecoder());
+            ch.pipeline().addLast(new ByteToModelDecoder());
             //涉及到数据库操作，所以放入businessGroup
             ch.pipeline().addLast(businessGroup, messageDataHandler);
         }
