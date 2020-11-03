@@ -6,6 +6,7 @@ import io.netty.util.concurrent.EventExecutorGroup;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 
 /**
  * 声明为spring容器的配置，注入到spring中
@@ -29,6 +30,7 @@ public class NettyLoopGroupConfig {
      * @return
      */
     @Bean(name = "bossGroup")
+    @Scope("prototype")
     public NioEventLoopGroup bossGroup() {
         return new NioEventLoopGroup(bossThreadsNum);
     }
@@ -38,6 +40,7 @@ public class NettyLoopGroupConfig {
      * @return
      */
     @Bean(name = "workerGroup")
+    @Scope("prototype")
     public NioEventLoopGroup workerGroup() {
         return new NioEventLoopGroup(workerThreadsNum);
     }
@@ -47,6 +50,7 @@ public class NettyLoopGroupConfig {
      * @return
      */
     @Bean(name = "businessGroup")
+    @Scope("prototype")
     public EventExecutorGroup businessGroup(){
         return new DefaultEventExecutorGroup(businessThreadsNum);
     }

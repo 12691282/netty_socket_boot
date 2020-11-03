@@ -8,7 +8,10 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.ResourceLeakDetector;
+import io.netty.util.concurrent.EventExecutorGroup;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,7 +32,7 @@ import javax.annotation.PreDestroy;
 @Slf4j
 public class ShortLinksNettyServer {
 
-    @Value("${netty.env-server-port}")
+    @Value("${netty.shortLinks-server-port}")
     private int port;
 
     @Autowired
@@ -39,6 +42,10 @@ public class ShortLinksNettyServer {
     @Autowired
     @Qualifier("workerGroup")
     private NioEventLoopGroup workerGroup;
+
+    @Autowired
+    @Qualifier("businessGroup")
+    private EventExecutorGroup businessGroup;
 
     @Autowired
     private ShortLinksChannelInitializer channelInitializer;
@@ -65,7 +72,7 @@ public class ShortLinksNettyServer {
         ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.SIMPLE);//内存泄漏检测 开发推荐PARANOID 线上SIMPLE
         ChannelFuture channelFuture = serverBootstrap.bind(port).sync();
         if (channelFuture.isSuccess()) {
-            log.info("socket短连接 服务启动完毕,port={}", this.port);
+            log.info("Netty 短连接 服务启动完毕,port={}", this.port);
         }
     }
 
@@ -81,6 +88,7 @@ public class ShortLinksNettyServer {
     public void destroy() {
         bossGroup.shutdownGracefully().syncUninterruptibly();
         workerGroup.shutdownGracefully().syncUninterruptibly();
+        businessGroup.shutdownGracefully().syncUninterruptibly();
         log.info("关闭成功");
     }
 }

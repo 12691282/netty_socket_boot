@@ -1,22 +1,17 @@
 package io.renren.modules.netty.server;
 
 import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.handler.codec.LineBasedFrameDecoder;
-import io.netty.handler.codec.string.StringDecoder;
-import io.netty.util.CharsetUtil;
 import io.netty.util.concurrent.EventExecutorGroup;
 import io.renren.modules.netty.decoder.ByteToModelDecoder;
 import io.renren.modules.netty.encoder.ModelMessageToByteEncoder;
-import io.renren.modules.netty.handler.ShortLinksMessageDataHandler;
+import io.renren.modules.netty.handler.LongLinksMessageDataHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ShortLinksChannelInitializer extends ChannelInitializer<SocketChannel> {
+public class LongLinksChannelInitializer extends ChannelInitializer<SocketChannel> {
 
     @Autowired
     @Qualifier("businessGroup")//开了50个线程来确保并发性
@@ -24,17 +19,16 @@ public class ShortLinksChannelInitializer extends ChannelInitializer<SocketChann
 
     //单例注入
     @Autowired
-    private ShortLinksMessageDataHandler shortLinksMessageDataHandler;
+    private LongLinksMessageDataHandler messageDataHandler;
 
     @Override
-    protected void initChannel(SocketChannel socketChannel) throws Exception {
-        ChannelPipeline pipeline = socketChannel.pipeline();
-
+    protected void initChannel(SocketChannel socketChannel) {
         /** 编码工具 */
         socketChannel.pipeline().addLast(new ModelMessageToByteEncoder());
         /** 解析报文 */
         socketChannel.pipeline().addLast(new ByteToModelDecoder());
-        pipeline.addLast(businessGroup, shortLinksMessageDataHandler);//涉及到数据库操作，所以放入businessGroup
+        //涉及到数据库操作，所以放入businessGroup
+        socketChannel.pipeline().addLast(businessGroup, messageDataHandler);
 
     }
 }

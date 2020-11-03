@@ -67,11 +67,11 @@ mybatis-plus:
 
 
 netty:
-  platform-server-port: 11001 #1号服务端口
-  env-server-port: 11002 #2号服务端口
+  longLinks-server-port: 12001 #1号服务端口
+  shortLinks-server-port: 12002 #2号服务端口
   read-timeout: 15 #读超时 15分钟
   threads:
-    boss: 1
+    boss: 2
     worker: 20
     business: 50 #业务线程数量
 

@@ -18,7 +18,7 @@ public class NettyClient implements Runnable {
 
     private static String host = "127.0.0.1";
 
-    private static Integer post = 11001;
+    private static Integer post = 12001;
 
     private String message;
 
@@ -49,14 +49,11 @@ public class NettyClient implements Runnable {
 
                 String headMessage  = message.substring(0, numb);
                 String bodyData  = message.substring(numb);
-                int dataSize = bodyData.getBytes().length;
-                byte[] lengthByte = intToByteArray(dataSize);
                 num++;
                 log.info("headMessage {} length {} bodyData {}", headMessage, bodyData.length(), bodyData);
                 DataPackageObj obj = new DataPackageObj();
                 obj.setHeadMessage(headMessage);
                 obj.setBodyData(bodyData);
-                obj.setLengthByte(lengthByte);
                 f.channel().writeAndFlush(obj);
                 try { //休眠一段时间
                     Thread.sleep(10000);
@@ -78,16 +75,6 @@ public class NettyClient implements Runnable {
         }
 
     }
-
-    public static byte[] intToByteArray(int i) {
-        byte[] result = new byte[4];
-        result[0] = (byte)((i >> 24) & 0xFF);
-        result[1] = (byte)((i >> 16) & 0xFF);
-        result[2] = (byte)((i >> 8) & 0xFF);
-        result[3] = (byte)(i & 0xFF);
-        return result;
-    }
-
 
     @Override
     public void run() {

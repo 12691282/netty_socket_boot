@@ -12,11 +12,11 @@ import lombok.extern.slf4j.Slf4j;
  */
 
 @Slf4j
-public class PlatformMessageToByteEncoder extends MessageToByteEncoder<ResponseModel> {
+public class ModelMessageToByteEncoder extends MessageToByteEncoder<ResponseModel> {
 
     @Override
     protected void encode(ChannelHandlerContext channelHandlerContext, ResponseModel response,
-                          ByteBuf byteBuf) throws Exception {
+                          ByteBuf byteBuf) {
         log.info(" 发送数据 : {} ", response);
         byteBuf.writeBytes(response.getHeadData().getBytes());
         byteBuf.writeBytes(response.getContentData().getBytes());

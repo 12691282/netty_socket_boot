@@ -8,8 +8,9 @@ import lombok.ToString;
 @ToString
 public class DataPackageObj {
 
+    //文件头信息
     private String headMessage;
+    //内容字符串
     private String bodyData;
-    private byte[] lengthByte;
 
 }

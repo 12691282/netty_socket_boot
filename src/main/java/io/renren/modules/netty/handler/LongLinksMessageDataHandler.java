@@ -1,7 +1,6 @@
 package io.renren.modules.netty.handler;
 
 
-import com.alibaba.fastjson.JSONObject;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandler;
@@ -11,25 +10,19 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.CharsetUtil;
 import io.renren.config.Commont;
 import io.renren.modules.netty.model.RequestModel;
-import io.renren.modules.netty.model.ResponseModel;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * 短连接数据处理器
- *
- */
 
 @Slf4j
 @Component
 @ChannelHandler.Sharable
-public class ShortLinksMessageDataHandler extends ChannelInboundHandlerAdapter {
+public class LongLinksMessageDataHandler extends ChannelInboundHandlerAdapter {
+
 
     /**
      * 管理一个全局map，保存连接进服务端的通道数量
@@ -63,9 +56,7 @@ public class ShortLinksMessageDataHandler extends ChannelInboundHandlerAdapter {
     public void channelInactive(ChannelHandlerContext ctx) {
 
         InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
-        if(insocket ==null || insocket.getAddress() == null){
-            return;
-        }
+
         String clientIp = insocket.getAddress().getHostAddress();
 
         ChannelId channelId = ctx.channel().id();
@@ -74,19 +65,16 @@ public class ShortLinksMessageDataHandler extends ChannelInboundHandlerAdapter {
         if (CHANNEL_MAP.containsKey(channelId)) {
             //删除连接
             CHANNEL_MAP.remove(channelId);
+
+            System.out.println();
             log.info("客户端【" + channelId + "】退出netty服务器[IP:" + clientIp + "--->PORT:" + insocket.getPort() + "]");
             log.info("连接通道数量: " + CHANNEL_MAP.size());
         }
     }
 
-    /**
-     * 业务数据处理区域 （msg）
-     * @param ctx
-     * @param msg
-     */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void channelRead(ChannelHandlerContext ctx, Object msg){
+    public void channelRead(ChannelHandlerContext ctx, Object msg) {
 
         log.info("加载客户端报文......");
         log.info("【" + ctx.channel().id() + "】" + " :" + msg);
@@ -105,20 +93,19 @@ public class ShortLinksMessageDataHandler extends ChannelInboundHandlerAdapter {
         RequestModel requestModel = (RequestModel)msg;
         String headMsg  = requestModel.getHeadData();
         String contentMsg  = requestModel.getContentData();
-
-
         log.info("原始请求数据 headMsg {} contentMsg {} " , headMsg, contentMsg);
         //响应客户端
-        this.sendCodeToClient(ctx,requestModel);
+        this.sendCodeToClient(ctx, requestModel);
 
     }
 
-    private void sendCodeToClient(ChannelHandlerContext ctx, RequestModel request) {
-        ResponseModel response = new ResponseModel(request);
-        // 需要响应就可以回复消息    跟读取数据时候一样  根据数据类型对应字节回复消息即可
-        ctx.writeAndFlush(response);
-//        ctx.close();
+    private void sendCodeToClient(ChannelHandlerContext ctx, RequestModel msgCode) {
+        /**
+         * 需要响应就可以回复消息    跟读取数据时候一样  根据数据类型对应字节回复消息即可
+         */
+        ctx.writeAndFlush(msgCode);
     }
+
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
@@ -126,11 +113,14 @@ public class ShortLinksMessageDataHandler extends ChannelInboundHandlerAdapter {
         ctx.flush();
     }
 
+
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         log.info("level-server  channelRead Exception ....");
         cause.printStackTrace();
         ctx.close();
     }
+
+
 
 }
