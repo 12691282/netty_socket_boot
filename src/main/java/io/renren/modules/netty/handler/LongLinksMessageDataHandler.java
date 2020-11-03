@@ -8,10 +8,16 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.CharsetUtil;
+import io.renren.common.utils.BeanUtils;
 import io.renren.config.Commont;
+import io.renren.modules.netty.dao.AcceptDataDao;
+import io.renren.modules.netty.entity.AcceptDataEntity;
 import io.renren.modules.netty.model.RequestModel;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.net.InetSocketAddress;
@@ -22,6 +28,12 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 @ChannelHandler.Sharable
 public class LongLinksMessageDataHandler extends ChannelInboundHandlerAdapter {
+
+
+    /**
+     * 获取事务控制管理器
+     */
+    private DataSourceTransactionManager transactionManager;
 
 
     /**
@@ -91,9 +103,28 @@ public class LongLinksMessageDataHandler extends ChannelInboundHandlerAdapter {
         }
 
         RequestModel requestModel = (RequestModel)msg;
-        String headMsg  = requestModel.getHeadData();
-        String contentMsg  = requestModel.getContentData();
-        log.info("原始请求数据 headMsg {} contentMsg {} " , headMsg, contentMsg);
+        AcceptDataEntity entity = new AcceptDataEntity();
+
+        entity.setBusinessCode(requestModel.getHeadData());
+        entity.setBusinessContent(requestModel.getContentData());
+        log.info("原始请求数据 headMsg {} contentMsg {} " , entity.getBusinessCode(), entity.getBusinessContent());
+
+        transactionManager = BeanUtils.getBean(DataSourceTransactionManager.class);
+        TransactionDefinition transactionDefinition =  BeanUtils.getBean(TransactionDefinition.class);
+        TransactionStatus transactionStatus = transactionManager.getTransaction(transactionDefinition);
+
+        try {
+
+            AcceptDataDao acceptDataDao =  BeanUtils.getBean(AcceptDataDao.class);
+            acceptDataDao.insert(entity);
+            //手动提交事务
+            transactionManager.commit(transactionStatus);
+
+        }catch (Exception e) {
+            //手动回滚事物
+            transactionManager.rollback(transactionStatus);
+            e.printStackTrace();
+        }
         //响应客户端
         this.sendCodeToClient(ctx, requestModel);
 
