@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  */
 
 
-public class LongLinksNettyServer implements Runnable{
+public class LongLinksNettyServer extends ThreadNettyServer implements Runnable{
 
     private Logger logger = LoggerFactory.getLogger(LongLinksNettyServer.class);
 
@@ -58,6 +58,7 @@ public class LongLinksNettyServer implements Runnable{
     @Override
     public void run() {
         try {
+            super.isReadyToGo();
             ServerBootstrap serverBootstrap = new ServerBootstrap();
             serverBootstrap.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)

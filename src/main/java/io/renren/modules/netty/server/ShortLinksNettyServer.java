@@ -30,7 +30,7 @@ import javax.annotation.PreDestroy;
 
 @Component
 @Slf4j
-public class ShortLinksNettyServer {
+public class ShortLinksNettyServer{
 
     @Value("${netty.shortLinks-server-port}")
     private int port;

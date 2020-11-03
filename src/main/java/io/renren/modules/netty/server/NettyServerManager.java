@@ -3,6 +3,7 @@ package io.renren.modules.netty.server;
 
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.util.concurrent.EventExecutorGroup;
+import io.renren.common.utils.BeanUtils;
 import io.renren.modules.netty.handler.LongLinksMessageDataHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
