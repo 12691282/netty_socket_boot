@@ -44,13 +44,6 @@ public class ByteToModelDecoder extends ByteToMessageDecoder {
         // 可读长度必须大于基本长度
         if (buffer.readableBytes() >= START_LENGTH) {
 
-            /**
-             * 数据小于起始大小时退出，重新对取
-             */
-            if (buffer.readableBytes() <= DATA_MIN_LENGTH) {
-               return;
-            }
-
             // 数据包的长度，又变得不满足
             // 此时，应该结束。等待后面的数据到达
 //            if (buffer.readableBytes() < START_LENGTH) {
@@ -70,6 +63,14 @@ public class ByteToModelDecoder extends ByteToMessageDecoder {
             byte[] businessContentLengthByte = new byte[BUSINESS_CONTENT_LENGTH];
             buffer.readBytes(businessContentLengthByte);
             Integer contentLength = NumberUtil.byteArrayToInt(businessContentLengthByte);
+
+            /**
+             * 数据 大于 默认容量时 重新对取
+             */
+            if (contentLength > DATA_MIN_LENGTH) {
+                buffer.resetReaderIndex();
+                return;
+            }
 
             log.info("content length {}", contentLength);
             log.info("data package  size {}", buffer.readableBytes());
