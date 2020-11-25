@@ -21,17 +21,19 @@ public class ByteToModelDecoder extends ByteToMessageDecoder {
  */
 
     /**
-     *
-     *  起始符 业务编码，占据7个字节
+     * 占据7个字节
      */
     public final int START_LENGTH = 7;
 
-
     /**
      *
-     *  起始符 业务编码，占据4个字节
+     *  起始符占据4个字节
      */
     public final int BUSINESS_CONTENT_LENGTH = 4;
+    /**
+     * 数据起始 大小
+     */
+    public final int DATA_MIN_LENGTH = 1024;
 
 
 
@@ -41,11 +43,12 @@ public class ByteToModelDecoder extends ByteToMessageDecoder {
 
         // 可读长度必须大于基本长度
         if (buffer.readableBytes() >= START_LENGTH) {
-            // 防止socket字节流攻击
-            // 防止，客户端传来的数据过大
-            // 因为，太大的数据，是不合理的
-            if (buffer.readableBytes() > 2048) {
-                buffer.skipBytes(buffer.readableBytes());
+
+            /**
+             * 数据小于起始大小时退出，重新对取
+             */
+            if (buffer.readableBytes() <= DATA_MIN_LENGTH) {
+               return;
             }
 
             // 数据包的长度，又变得不满足
