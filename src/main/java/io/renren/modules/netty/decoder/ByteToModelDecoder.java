@@ -30,11 +30,6 @@ public class ByteToModelDecoder extends ByteToMessageDecoder {
      *  起始符占据4个字节
      */
     public final int BUSINESS_CONTENT_LENGTH = 4;
-    /**
-     * 数据起始 大小
-     */
-    public final int DATA_MIN_LENGTH = 1024;
-
 
 
     @Override
@@ -67,7 +62,7 @@ public class ByteToModelDecoder extends ByteToMessageDecoder {
             /**
              * 数据 大于 默认容量时 重新对取
              */
-            if (contentLength > DATA_MIN_LENGTH) {
+            if (contentLength > buffer.readableBytes()) {
                 buffer.resetReaderIndex();
                 return;
             }
